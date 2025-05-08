@@ -1,0 +1,28 @@
+name: Génération de la veille systémique
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'  # Lundi à 12h (heure de Paris = UTC+2)
+  workflow_dispatch:
+
+jobs:
+  generate_veille:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cloner le dépôt
+        uses: actions/checkout@v3
+
+      - name: Générer la veille (placeholder)
+        run: |
+          mkdir -p veille
+          echo "# 🌍 Veille du $(date '+%Y-%m-%d')" > veille/veille-$(date '+%Y-%m-%d').md
+          echo "\n👉 Contenu à insérer ici. (Je te fournirai la veille chaque semaine)" >> veille/veille-$(date '+%Y-%m-%d').md
+
+      - name: Commit & Push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add veille/
+          git commit -m "🆕 Ajout de la veille du $(date '+%Y-%m-%d')" || echo "Aucun changement"
+          git push
