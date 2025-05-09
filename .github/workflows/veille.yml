@@ -1,28 +1,30 @@
-name: Génération de la veille systémique
+name: Récupération automatique de la veille
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # Lundi à 12h (heure de Paris = UTC+2)
+    - cron: '0 10 * * 1'  # Chaque lundi à 12h heure de Paris (10h UTC)
   workflow_dispatch:
 
 jobs:
-  generate_veille:
+  fetch_veille:
     runs-on: ubuntu-latest
 
     steps:
       - name: Cloner le dépôt
         uses: actions/checkout@v3
 
-      - name: Générer la veille (placeholder)
+      - name: Télécharger la veille depuis veille_contenu
         run: |
           mkdir -p veille
-          echo "# 🌍 Veille du $(date '+%Y-%m-%d')" > veille/veille-$(date '+%Y-%m-%d').md
-          echo "\n👉 Contenu à insérer ici. (Je te fournirai la veille chaque semaine)" >> veille/veille-$(date '+%Y-%m-%d').md
+          FILENAME="veille-$(date '+%Y-%m-%d').md"
+          URL="https://raw.githubusercontent.com/GabrielPlassat/veille_contenu/main/$FILENAME"
+          echo "Téléchargement de $URL"
+          curl -f -o "veille/$FILENAME" "$URL" || echo "⚠️ Fichier non trouvé pour aujourd'hui"
 
-      - name: Commit & Push
+      - name: Commit et push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add veille/
-          git commit -m "🆕 Ajout de la veille du $(date '+%Y-%m-%d')" || echo "Aucun changement"
+          git commit -m "🔁 Ajout automatique de la veille du $(date '+%Y-%m-%d')" || echo "Rien à committer"
           git push
